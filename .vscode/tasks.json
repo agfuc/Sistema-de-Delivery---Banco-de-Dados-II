@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run delivery app (JDK 25)",
+			"type": "shell",
+			"command": "$jdkPaths = @((Join-Path $env:USERPROFILE '.jdk'), (Join-Path $env:ProgramFiles 'Eclipse Adoptium')); $jdk = Get-ChildItem -Path $jdkPaths -Directory -Filter 'jdk-25*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1; if (-not $jdk) { throw 'JDK 25 not found. Install Temurin 25 first.' }; $secure = Read-Host 'PostgreSQL password for usuario_dba' -AsSecureString; if ($secure.Length -eq 0) { throw 'Password cannot be empty.' }; $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure); try { $env:DELIVERY_PG_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer); $secure.Dispose() }; $env:DELIVERY_PG_USER = 'usuario_dba'; $env:JAVA_HOME = $jdk.FullName; $env:Path = $env:JAVA_HOME + '\\bin;' + $env:Path; Set-Location '.\\nosql-app'; mvn compile exec:java",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
